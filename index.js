@@ -28,17 +28,27 @@ async function run() {
     console.log('Connected to MongoDB');
 
     // Define routes after the MongoDB client is connected
-    const mealsCollection = client.db("mealsDB").collection("checkout");
+    const checkoutCollection = client.db("mealsDB").collection("checkout");
+    const mealsCollection = client.db("mealsDB").collection("meals");
 
     app.get("/v1/paymentCard", async (req, res) => {
       try {
-        const result = await mealsCollection.find().toArray();
+        const result = await checkoutCollection.find().toArray();
         console.log(result);
         res.send(result);
       } catch (error) {
         console.error('Error in /v1/paymentCard route:', error);
         res.status(500).send('Internal Server Error');
       }
+    });
+
+
+    app.post("/v1/meals", async (req, res) => {
+      const meal = req.body;
+      //   console.log(user);
+      const result = await mealsCollection.insertOne(meal);
+      console.log(result);
+      res.send(result);
     });
 
 
