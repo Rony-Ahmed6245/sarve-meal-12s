@@ -30,7 +30,9 @@ async function run() {
     // Define routes after the MongoDB client is connected
     const checkoutCollection = client.db("mealsDB").collection("checkout");
     const mealsCollection = client.db("mealsDB").collection("meals");
+    const productionCollection = client.db("mealsDB").collection("ProductionMeal");
 
+    // payment get data api
     app.get("/v1/paymentCard", async (req, res) => {
       try {
         const result = await checkoutCollection.find().toArray();
@@ -42,7 +44,20 @@ async function run() {
       }
     });
 
+    // meals get data api 
+    app.get("/v1/meals", async (req, res) => {
+      try {
+        const result = await mealsCollection.find().toArray();
+        console.log(result);
+        res.send(result);
+      } catch (error) {
+        console.error('Error in /v1/paymentCard route:', error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
 
+
+    // meals post data api 
     app.post("/v1/meals", async (req, res) => {
       const meal = req.body;
       //   console.log(user);
@@ -51,6 +66,15 @@ async function run() {
       res.send(result);
     });
 
+    // production meal post api 
+    
+    app.post("/v1/production", async (req, res) => {
+      const productionMeal = req.body;
+      //   console.log(user);
+      const result = await productionCollection.insertOne(productionMeal);
+      console.log(result);
+      res.send(result);
+    });
 
 
 
