@@ -31,6 +31,7 @@ async function run() {
     const checkoutCollection = client.db("mealsDB").collection("checkout");
     const mealsCollection = client.db("mealsDB").collection("meals");
     const productionCollection = client.db("mealsDB").collection("ProductionMeal");
+    const usersCollection = client.db("mealsDB").collection("users");
 
     // payment get data api
     app.get("/v1/paymentCard", async (req, res) => {
@@ -44,6 +45,16 @@ async function run() {
       }
     });
 
+
+
+     // meals post data api 
+     app.post("/v1/meals", async (req, res) => {
+      const meal = req.body;
+      //   console.log(user);
+      const result = await mealsCollection.insertOne(meal);
+      console.log(result);
+      res.send(result);
+    });
     // meals get data api 
     app.get("/v1/meals", async (req, res) => {
       try {
@@ -57,15 +68,6 @@ async function run() {
     });
 
 
-    // meals post data api 
-    app.post("/v1/meals", async (req, res) => {
-      const meal = req.body;
-      //   console.log(user);
-      const result = await mealsCollection.insertOne(meal);
-      console.log(result);
-      res.send(result);
-    });
-
     // production meal post api 
     
     app.post("/v1/production", async (req, res) => {
@@ -75,6 +77,38 @@ async function run() {
       console.log(result);
       res.send(result);
     });
+
+      // meals get data api 
+      app.get("/v1/production", async (req, res) => {
+        try {
+          const result = await productionCollection.find().toArray();
+          console.log(result);
+          res.send(result);
+        } catch (error) {
+          res.status(500).send('Internal Server Error');
+        }
+      });
+
+
+      // users post api 
+      app.post("/v1/users", async (req, res) => {
+        const users = req.body;
+        //   console.log(users);
+        const result = await usersCollection.insertOne(users);
+        console.log(result);
+        res.send(result);
+      });
+
+      // user get api 
+      app.get("/v1/users", async (req, res) => {
+        try {
+          const result = await usersCollection.find().toArray();
+          console.log(result);
+          res.send(result);
+        } catch (error) {
+          res.status(500).send('Internal Server Error');
+        }
+      });
 
 
 
