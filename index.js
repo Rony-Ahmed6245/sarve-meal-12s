@@ -1,4 +1,5 @@
 const express = require('express');
+const {ObjectId} = require('mongodb');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
@@ -47,8 +48,8 @@ async function run() {
 
 
 
-     // meals post data api 
-     app.post("/v1/meals", async (req, res) => {
+    // meals post data api 
+    app.post("/v1/meals", async (req, res) => {
       const meal = req.body;
       //   console.log(user);
       const result = await mealsCollection.insertOne(meal);
@@ -69,7 +70,7 @@ async function run() {
 
 
     // production meal post api 
-    
+
     app.post("/v1/production", async (req, res) => {
       const productionMeal = req.body;
       //   console.log(user);
@@ -78,39 +79,78 @@ async function run() {
       res.send(result);
     });
 
-      // meals get data api 
-      app.get("/v1/production", async (req, res) => {
-        try {
-          const result = await productionCollection.find().toArray();
-          console.log(result);
-          res.send(result);
-        } catch (error) {
-          res.status(500).send('Internal Server Error');
-        }
-      });
-
-
-      // users post api 
-      app.post("/v1/users", async (req, res) => {
-        const users = req.body;
-        //   console.log(users);
-        const result = await usersCollection.insertOne(users);
+    // meals get data api 
+    app.get("/v1/production", async (req, res) => {
+      try {
+        const result = await productionCollection.find().toArray();
         console.log(result);
         res.send(result);
-      });
-
-      // user get api 
-      app.get("/v1/users", async (req, res) => {
-        try {
-          const result = await usersCollection.find().toArray();
-          console.log(result);
-          res.send(result);
-        } catch (error) {
-          res.status(500).send('Internal Server Error');
-        }
-      });
+      } catch (error) {
+        res.status(500).send('Internal Server Error');
+      }
+    });
 
 
+    // users post api 
+    app.post("/v1/users", async (req, res) => {
+      const users = req.body;
+      //   console.log(users);
+      const result = await usersCollection.insertOne(users);
+      console.log(result);
+      res.send(result);
+    });
+
+    // user get api 
+    app.get("/v1/users", async (req, res) => {
+      try {
+        const result = await usersCollection.find().toArray();
+        console.log(result);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send('Internal Server Error');
+      }
+    });
+    // put api 
+// ...
+
+app.put("/v1/meals/:id", async (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  console.log("id", id, data);
+
+  // Extract the data from the request body
+  const {
+    distributorName,
+    distributorEmail,
+    mealTitle,
+    price,
+    ingredient,
+    description,
+  } = data;
+
+  const filter = { _id: new ObjectId(id) };
+  const options = { upsert: true };
+
+  // Use the extracted data in the $set object
+  const updatedUser = {
+    $set: {
+      mealTitle: mealTitle,
+      price: price,
+      ing: ingredient,
+      dsc: description,
+    },
+  };
+
+  try {
+    const result = await mealsCollection.updateOne(filter, updatedUser, options);
+    res.send(result);
+  } catch (error) {
+    console.error('Error updating meal:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// ...
 
 
 
@@ -118,7 +158,9 @@ async function run() {
 
 
 
-    
+
+
+
     // Listen on the specified port
     app.listen(port, () => {
       console.log(`Example app listening on port ${port}`);
@@ -134,7 +176,7 @@ async function run() {
   }
 }
 app.get("/", (req, res) => {
-    res.send("Crud is running...");
-  });
+  res.send("Crud is running...");
+});
 // Start the application
 run().catch(console.dir);
