@@ -1,5 +1,5 @@
-const express = require('express');
-const {ObjectId} = require('mongodb');
+const express =require('express');
+const { ObjectId } = require('mongodb');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
@@ -33,6 +33,7 @@ async function run() {
     const mealsCollection = client.db("mealsDB").collection("meals");
     const productionCollection = client.db("mealsDB").collection("ProductionMeal");
     const usersCollection = client.db("mealsDB").collection("users");
+    const usersMealRequestCollection = client.db("mealsDB").collection("MealRequestUser");
 
     // payment get data api
     app.get("/v1/paymentCard", async (req, res) => {
@@ -45,7 +46,6 @@ async function run() {
         res.status(500).send('Internal Server Error');
       }
     });
-
 
 
     // meals post data api 
@@ -110,47 +110,63 @@ async function run() {
         res.status(500).send('Internal Server Error');
       }
     });
+
     // put api 
-// ...
 
-app.put("/v1/meals/:id", async (req, res) => {
-  const id = req.params.id;
-  const data = req.body;
-  console.log("id", id, data);
+    app.put("/v1/meals/:id", async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      console.log("id", id, data);
+      const {
+        distributorName,
+        distributorEmail,
+        mealTitle,
+        price,
+        ingredient,
+        description,
+      } = data;
 
-  // Extract the data from the request body
-  const {
-    distributorName,
-    distributorEmail,
-    mealTitle,
-    price,
-    ingredient,
-    description,
-  } = data;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
 
-  const filter = { _id: new ObjectId(id) };
-  const options = { upsert: true };
+      const updatedUser = {
+        $set: {
+          mealTitle: mealTitle,
+          price: price,
+          ing: ingredient,
+          dsc: description,
+        },
+      };
 
-  // Use the extracted data in the $set object
-  const updatedUser = {
-    $set: {
-      mealTitle: mealTitle,
-      price: price,
-      ing: ingredient,
-      dsc: description,
-    },
-  };
+      try {
+        const result = await mealsCollection.updateOne(filter, updatedUser, options);
+        res.send(result);
+      } catch (error) {
+        console.error('Error updating meal:', error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
 
-  try {
-    const result = await mealsCollection.updateOne(filter, updatedUser, options);
-    res.send(result);
-  } catch (error) {
-    console.error('Error updating meal:', error);
-    res.status(500).send('Internal Server Error');
-  }
-});
+    // user meal reuest post api 
+    app.post("/v1/userMealRequest", async (req, res) => {
+      const users = req.body;
+      //   console.log(users);
+      const result = await usersMealRequestCollection.insertOne(users);
+      console.log(result);
+      res.send(result);
+    });
 
-// ...
+    // user meal request get api 
+    app.get("/v1/mealRequestUser", async (req, res) => {
+      try {
+        const result = await usersMealRequestCollection.find().toArray();
+        console.log(result);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send('Internal Server Error');
+      }
+    });
+
 
 
 
