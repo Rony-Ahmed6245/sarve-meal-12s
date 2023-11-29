@@ -169,7 +169,23 @@ async function run() {
 
 
 
+// delete operation 
+app.delete("/v1/meals/:id", async (req, res) => {
+  const mealId = req.params.id;
 
+  try {
+    const result = await mealsCollection.deleteOne({ _id: new ObjectId(mealId) });
+
+    if (result.deletedCount === 1) {
+      res.json({ success: true, message: "Meal deleted successfully." });
+    } else {
+      res.status(404).json({ success: false, message: "Meal not found." });
+    }
+  } catch (error) {
+    console.error('Error deleting meal:', error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
 
 
 
